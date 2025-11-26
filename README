@@ -1,0 +1,171 @@
+📊 API Dinâmica de Gráficos (Node.js + Express + Sequelize + MySQL)
+
+Esta API tem como objetivo ler dados de um banco MySQL local e retornar valores formatados especificamente para gráficos de dashboard, como pizza, linha e barra.
+Os endpoints retornam os dados diretamente no formato utilizado por bibliotecas como Chart.js, ApexCharts ou ECharts.
+
+📁 1. Estrutura do Projeto
+/api
+ ├── app.js
+ ├── models/
+ │    └── db.js
+ ├── package.json
+ └── README.md  (este arquivo)
+
+🧩 2. Tecnologias Utilizadas
+
+Node.js
+
+Express
+
+Sequelize
+
+MySQL 8
+
+JavaScript
+
+🗄️ 3. Requisitos do Banco de Dados
+
+A API depende das seguintes tabelas no banco cadastro:
+
+📌 Tabela vendas
+coluna	tipo
+categoria	VARCHAR
+quantidade	INT
+📌 Tabela vendas_mensais
+coluna	tipo
+mes	VARCHAR
+total	INT
+📌 Tabela usuarios
+coluna	tipo
+sexo	VARCHAR
+🚀 4. Instalação e Execução
+1. Instalar dependências
+npm install
+
+2. Configurar o banco
+
+No arquivo:
+
+/models/db.js
+
+
+Informe:
+
+host
+
+user
+
+password
+
+database (cadastro)
+
+3. Rodar o servidor
+node app.js
+
+
+Ou:
+
+npx nodemon app.js
+
+API disponível em:
+http://localhost:8081
+
+🔄 5. Endpoints Disponíveis
+🎯 GET /chart/pizza
+
+Retorna dados formatados para gráficos de pizza usando a tabela vendas.
+
+Exemplo de Resposta
+{
+  "tipo": "pizza",
+  "dados": {
+    "labels": ["Eletrônicos","Roupas","Alimentos"],
+    "datasets":[{ "data":[40,25,70] }]
+  }
+}
+
+📈 GET /chart/linha
+
+Retorna valores mensais de vendas (tabela vendas_mensais), ordenados por ID.
+
+Exemplo:
+{
+  "tipo": "linha",
+  "dados": {
+    "labels": ["Janeiro","Fevereiro","Março"],
+    "datasets":[{ "label":"Total mensal", "data":[120,150,130] }]
+  }
+}
+
+📊 GET /chart/barra
+
+Retorna dados de vendas por categoria, ordenados de forma decrescente.
+
+Exemplo:
+{
+  "tipo":"barra",
+  "dados":{
+    "labels":["Alimentos","Eletrônicos","Roupas"],
+    "datasets":[{ "label":"Quantidade por categoria","data":[70,40,25] }]
+  }
+}
+
+🧑‍🤝‍🧑 GET /chart/pizzaUsuarios
+
+Retorna quantidade de usuários por sexo.
+
+Exemplo:
+{
+  "tipo":"pizzaUsuarios",
+  "dados":{
+    "labels":["Masculino","Feminino"],
+    "datasets":[{ "data":[3,3] }]
+  }
+}
+
+🛠️ 6. Funcionamento do Código
+
+Cada rota executa um SQL direto via sequelize.query(), processa os dados e os transforma no formato adequado para dashboards.
+
+Exemplo interno:
+const [rows] = await sequelize.query("SELECT categoria AS label, quantidade AS value FROM vendas");
+return {
+  labels: rows.map(r => r.label),
+  datasets: [{ data: rows.map(r => r.value) }]
+};
+
+❗ Erros Comuns e Soluções
+Erro	Causa	Solução
+SequelizeAccessDeniedError	Usuário do MySQL inválido	Ajustar credenciais em models/db.js
+Unknown column 'mes'	Estrutura do banco diferente	Verificar tabelas
+API retorna vazio	Banco sem dados	Inserir registros de teste
+🧪 7. Teste Rápido via Browser ou Curl
+Pizza:
+http://localhost:8081/chart/pizza
+
+Linha:
+http://localhost:8081/chart/linha
+
+Barra:
+http://localhost:8081/chart/barra
+
+Pizza de usuários:
+http://localhost:8081/chart/pizzaUsuarios
+
+✔ 8. Resultado Esperado
+
+A API retorna dados formatados e prontos para gráficos, permitindo construção fácil de dashboards dinâmicos.
+
+📌 9. Conclusão
+
+Esta API foi estruturada para fornecer dados de banco de forma simples, rápida e formatada, permitindo integrações diretas com dashboards e aplicações front-end.
+
+Caso deseje expandir, recomenda-se adicionar:
+
+filtros de data,
+
+autenticação JWT,
+
+testes unitários,
+
+Swagger/OpenAPI.
