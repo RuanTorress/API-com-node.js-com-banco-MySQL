@@ -1,171 +1,116 @@
-📊 API Dinâmica de Gráficos (Node.js + Express + Sequelize + MySQL)
+# Resumo técnico da API de gráficos (Node.js + Express + Sequelize + MySQL)
 
-Esta API tem como objetivo ler dados de um banco MySQL local e retornar valores formatados especificamente para gráficos de dashboard, como pizza, linha e barra.
-Os endpoints retornam os dados diretamente no formato utilizado por bibliotecas como Chart.js, ApexCharts ou ECharts.
+Visão geral
+- API simples em Node.js que expõe endpoints para retornar dados prontos para gráficos (Chart.js).
+- Conexão com MySQL via Sequelize (`models/db.js`).
+- Server: `app.js`, porta 8081.
 
-📁 1. Estrutura do Projeto
-/api
- ├── app.js
- ├── models/
- │    └── db.js
- ├── package.json
- └── README.md  (este arquivo)
+Front-end
+- Foi criado um front-end simples (`dashboard.html`) que consome os endpoints da API (Chart.js). O arquivo é servido pelo servidor em `http://localhost:8081/` e integra visualmente os dados retornados pelos endpoints de gráfico.
 
-🧩 2. Tecnologias Utilizadas
+Arquivos principais
+- `app.js` — define rotas e serve o front-end (`dashboard.html`):
+  - GET /chart/pizza       → dados por categoria (tabela `vendas`)
+  - GET /chart/linha       → totais mensais (tabela `vendas_mensais`)
+  - GET /chart/barra       → dados por categoria ordenados (tabela `vendas`)
+  - GET /chart/pizzaUsuarios → contagem por sexo (tabela `usuarios`)
+  - GET / (ou abrir `/dashboard.html`) → página estática com visualização (Chart.js)
+- `models/db.js` — configuração do Sequelize (host, usuário, senha, database).
 
-Node.js
+Dependências (mínimas)
+- node >= 14
+- npm
+- express
+- sequelize
+- mysql2
 
-Express
+Instalação e execução
+1. Vá para a pasta do projeto:
+   ```powershell
+   cd C:\Users\ruanf\Desktop\api
+   ```
+2. Instale dependências:
+   ```powershell
+   npm install
+   ```
+   (ou instale os pacotes explicitamente: `npm install express sequelize mysql2`)
+3. Iniciar o servidor:
+   ```powershell
+   node app.js
+   # ou durante desenvolvimento
+   npx nodemon app.js
+   ```
+4. Acesse o front-end (dashboard) no navegador:
+   ```
+   http://localhost:8081
+   ```
+   A página `dashboard.html` será servida pela API e consumirá os endpoints de dados.
 
-Sequelize
+Endpoints disponíveis (exemplos de uso)
+- GET /chart/pizza
+- GET /chart/linha
+- GET /chart/barra
+- GET /chart/pizzaUsuarios
 
-MySQL 8
+Exemplos de resposta (com dados já populados no seu banco)
+- GET /chart/pizza
 
-JavaScript
-
-🗄️ 3. Requisitos do Banco de Dados
-
-A API depende das seguintes tabelas no banco cadastro:
-
-📌 Tabela vendas
-coluna	tipo
-categoria	VARCHAR
-quantidade	INT
-📌 Tabela vendas_mensais
-coluna	tipo
-mes	VARCHAR
-total	INT
-📌 Tabela usuarios
-coluna	tipo
-sexo	VARCHAR
-🚀 4. Instalação e Execução
-1. Instalar dependências
-npm install
-
-2. Configurar o banco
-
-No arquivo:
-
-/models/db.js
-
-
-Informe:
-
-host
-
-user
-
-password
-
-database (cadastro)
-
-3. Rodar o servidor
-node app.js
-
-
-Ou:
-
-npx nodemon app.js
-
-API disponível em:
-http://localhost:8081
-
-🔄 5. Endpoints Disponíveis
-🎯 GET /chart/pizza
-
-Retorna dados formatados para gráficos de pizza usando a tabela vendas.
-
-Exemplo de Resposta
+```json
 {
   "tipo": "pizza",
   "dados": {
-    "labels": ["Eletrônicos","Roupas","Alimentos"],
-    "datasets":[{ "data":[40,25,70] }]
+    "labels": ["Eletrônicos","Roupas","Alimentos","Moveis","Brinquedos"],
+    "datasets": [{"data": [40,25,70,15,30]}]
   }
 }
+```
 
-📈 GET /chart/linha
+- GET /chart/linha
 
-Retorna valores mensais de vendas (tabela vendas_mensais), ordenados por ID.
-
-Exemplo:
+```json
 {
   "tipo": "linha",
   "dados": {
-    "labels": ["Janeiro","Fevereiro","Março"],
-    "datasets":[{ "label":"Total mensal", "data":[120,150,130] }]
+    "labels": ["Janeiro","Fevereiro","Março","Abril","Maio"],
+    "datasets": [{"label": "Total mensal", "data": [120,150,130,200,220]}]
   }
 }
+```
 
-📊 GET /chart/barra
+- GET /chart/pizzaUsuarios
 
-Retorna dados de vendas por categoria, ordenados de forma decrescente.
-
-Exemplo:
+```json
 {
-  "tipo":"barra",
-  "dados":{
-    "labels":["Alimentos","Eletrônicos","Roupas"],
-    "datasets":[{ "label":"Quantidade por categoria","data":[70,40,25] }]
+  "tipo": "pie",
+  "dados": {
+    "labels": ["Masculino","Feminino"],
+    "datasets": [{"data": [3,3]}]
   }
 }
+```
 
-🧑‍🤝‍🧑 GET /chart/pizzaUsuarios
+Boas práticas e observações
+- Credenciais não devem ficar hardcoded. Use variáveis de ambiente (ex.: dotenv) em produção.
+- Verifique se o MySQL está rodando e se o banco `cadastro` existe com as tabelas e dados.
+- Se ocorrer erro de conexão: confira host, usuário, senha e permissões do MySQL.
+- Nodemon não encontrado no Windows: use `npx nodemon app.js` ou instale globalmente `npm install -g nodemon`.
+- Evite abrir `dashboard.html` via `file://` — a página agora é servida pelo servidor para evitar problemas de CORS.
 
-Retorna quantidade de usuários por sexo.
+Possíveis próximos passos
+- Adicionar variáveis de ambiente (.env) e exemplo `.env.example`.
+- Criar migrações/seeds com Sequelize CLI.
+- Adicionar testes automáticos para endpoints (jest/supertest).
+- Documentar com Swagger/OpenAPI.
 
-Exemplo:
-{
-  "tipo":"pizzaUsuarios",
-  "dados":{
-    "labels":["Masculino","Feminino"],
-    "datasets":[{ "data":[3,3] }]
-  }
-}
+Contato e manutenção
+- Para reportar problemas ou pedir melhorias, inclua os logs do servidor (saída do `node app.js`) e exemplos de requests que falharam.
 
-🛠️ 6. Funcionamento do Código
+Resumo rápido de comandos (PowerShell):
 
-Cada rota executa um SQL direto via sequelize.query(), processa os dados e os transforma no formato adequado para dashboards.
-
-Exemplo interno:
-const [rows] = await sequelize.query("SELECT categoria AS label, quantidade AS value FROM vendas");
-return {
-  labels: rows.map(r => r.label),
-  datasets: [{ data: rows.map(r => r.value) }]
-};
-
-❗ Erros Comuns e Soluções
-Erro	Causa	Solução
-SequelizeAccessDeniedError	Usuário do MySQL inválido	Ajustar credenciais em models/db.js
-Unknown column 'mes'	Estrutura do banco diferente	Verificar tabelas
-API retorna vazio	Banco sem dados	Inserir registros de teste
-🧪 7. Teste Rápido via Browser ou Curl
-Pizza:
-http://localhost:8081/chart/pizza
-
-Linha:
-http://localhost:8081/chart/linha
-
-Barra:
-http://localhost:8081/chart/barra
-
-Pizza de usuários:
-http://localhost:8081/chart/pizzaUsuarios
-
-✔ 8. Resultado Esperado
-
-A API retorna dados formatados e prontos para gráficos, permitindo construção fácil de dashboards dinâmicos.
-
-📌 9. Conclusão
-
-Esta API foi estruturada para fornecer dados de banco de forma simples, rápida e formatada, permitindo integrações diretas com dashboards e aplicações front-end.
-
-Caso deseje expandir, recomenda-se adicionar:
-
-filtros de data,
-
-autenticação JWT,
-
-testes unitários,
-
-Swagger/OpenAPI.
+```powershell
+cd C:\Users\ruanf\Desktop\api
+npm install
+node app.js
+# ou durante desenvolvimento
+npx nodemon app.js
+```
